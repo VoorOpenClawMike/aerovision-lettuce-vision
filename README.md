@@ -118,3 +118,37 @@ de EXIF/specsheet van de gebruikte drone en de `vlieghoogte` uit het vluchtplan.
 
 **Tests:** `tests/test_gsd.py` (referentiewaarde, lineaire hoogte-schaling,
 oppervlak-schaling met GSD², invoervalidatie).
+
+---
+
+## Module 2 — Detectie / segmentatie (`src/detection/`)
+
+YOLO11-seg (Ultralytics) trainings- en inferentie-wrapper, plus een
+COCO→YOLO-seg-conversie.
+
+- **`coco_to_yolo.py`** — converteert `instances.coco.json` naar de
+  Ultralytics-mappenstructuur (`images/{train,val}`, `labels/{train,val}`,
+  `data.yaml`), met genormaliseerde polygon-labels en een deterministische
+  80/20-split. Puur (stdlib), volledig unit-getest.
+- **`train.py`** — trainingswrapper, configureerbare `epochs`/`imgsz`/`batch`/
+  `device`. Default **50 epochs op CPU** op de synthetische set (draait in
+  enkele minuten). `build_train_config()` is puur en getest.
+- **`infer.py`** — draait het model over beelden, zet elk instance-masker om in
+  een detectierecord (centroïde + `area_px`, optioneel `area_cm2`) en schrijft
+  `results/detections.csv`. Masker-helpers zijn pure NumPy en getest.
+
+**Gebruik:**
+```bash
+python -m src.detection.coco_to_yolo --coco data/synthetic/annotations/instances.coco.json \
+    --images data/synthetic/images --out data/yolo_seg
+python -m src.detection.train --data data/yolo_seg/data.yaml --epochs 50 --device cpu
+python -m src.detection.infer --model runs/segment/krop_seg/weights/best.pt \
+    --images data/synthetic/images --out results/detections.csv --gsd 0.25
+```
+
+**Opschalen naar productie (echte GPU / Colab):** gebruik een groter model
+(`yolo11m/l/x-seg.pt`), `--device 0`, `epochs 100–300`, grotere `batch` en
+`imgsz 1024` voor hoge-resolutie orthomosaïeken. Zie `build_train_config`.
+
+**Tests:** `tests/test_detection.py` (normalisatie/clamping, split,
+COCO→YOLO-layout, masker-area/centroïde, resize, trainconfig-validatie).

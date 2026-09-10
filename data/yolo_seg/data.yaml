@@ -1,0 +1,5 @@
+path: /workspaces/Projects/data/yolo_seg
+train: images/train
+val: images/val
+names:
+  0: krop

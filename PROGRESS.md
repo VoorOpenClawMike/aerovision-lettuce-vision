@@ -12,3 +12,7 @@ Doorlopend logboek van de autonome build. Nieuwste onderaan.
 - **Module 3 — calibration/gsd** ✅ Gebouwd + 5 unit tests groen. Fysisch
   correcte GSD-formule (×100 m→cm; opdrachtformule miste die factor — expliciet
   gedocumenteerd). Camera-presets + CLI. README-sectie toegevoegd.
+- **Module 2 — detection** ✅ COCO→YOLO-seg converter + train/infer wrappers
+  gebouwd; 6 unit tests groen. Converter geeft 5 train / 1 val / 150 instances.
+  Echte YOLO11n-seg training gestart op CPU (yolo11n-seg.pt download via mirror;
+  github.com is geblokkeerd in de container). README-sectie toegevoegd.
