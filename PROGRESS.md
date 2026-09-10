@@ -28,3 +28,6 @@ Doorlopend logboek van de autonome build. Nieuwste onderaan.
 - **Pijplijn-orkestrator (src/pipeline.py)** ✅ Gebouwd + 3 tests groen.
   Detectie→features→regressie→klasse→CSV met synth geo-referentie en
   YOLO-of-grondwaarheid fallback. results/field_detections.csv (480 rijen).
+- **Module 6 — dashboard** ✅ Streamlit-app + pure data-helpers gebouwd;
+  6 unit tests groen. KPI's per klasse, folium-veldkaart (Bed & Bracket
+  amber/groen/roestrood), gewichtshistogram per klasse. app importeert schoon.

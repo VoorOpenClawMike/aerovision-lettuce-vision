@@ -224,3 +224,25 @@ weight_class, lat, lon`) — de invoer voor het dashboard.
 ```bash
 python -m src.pipeline --gsd 0.25   # + optioneel --model runs/.../best.pt
 ```
+
+---
+
+## Module 6 — Streamlit-dashboard (`src/dashboard/app.py`)
+
+Laadt `results/field_detections.csv` en toont:
+(a) **aantallen per klasse** (KPI's + gemiddeld gewicht + geschatte opbrengst),
+(b) een **kleurgecodeerde folium-veldkaart** (amber `light` / groen `medium` /
+roestrood `heavy` — Bed & Bracket-kleuren), en
+(c) een **gewichtshistogram** per klasse.
+
+Pure data-helpers staan in `src/dashboard/data.py` (getest); `app.py` bevat de
+dunne Streamlit-UI.
+
+**Gebruik:**
+```bash
+python -m src.pipeline                       # maakt results/field_detections.csv
+streamlit run src/dashboard/app.py           # open de demo
+```
+
+**Tests:** `tests/test_dashboard.py` (CSV-validatie, klassetellingen,
+kleurmapping, KPI's, histogram-bins, folium-kaartopbouw).
