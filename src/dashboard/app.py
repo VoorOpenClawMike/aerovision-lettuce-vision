@@ -1,6 +1,3 @@
-import sys, pathlib
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
-
 """Streamlit dashboard for the krop-sla weight-class field report (Module 6).
 
 Loads a detection CSV (``krop_id, cx, cy, area_cm2, weight_class[, weight_g,
@@ -16,6 +13,9 @@ By default it loads ``results/field_detections.csv`` (produced by src.pipeline);
 you can also upload a CSV in the sidebar.
 """
 from __future__ import annotations
+
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 import os
 
