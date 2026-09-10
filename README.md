@@ -152,3 +152,30 @@ python -m src.detection.infer --model runs/segment/krop_seg/weights/best.pt \
 
 **Tests:** `tests/test_detection.py` (normalisatie/clamping, split,
 COCO→YOLO-layout, masker-area/centroïde, resize, trainconfig-validatie).
+
+---
+
+## Module 4 — Gewichtsregressie (`src/regression/weight_model.py`)
+
+Uit elk segmentatiemasker worden vorm-features berekend
+(`area_cm2`, `perimeter_cm`, `compactness = 4π·A/P²`, `hull_ratio = A/hull`,
+`eq_diameter_cm`) en via **Ridge-regressie** (scikit-learn, met
+`StandardScaler`) omgezet naar geschat versgewicht. Daarna classificatie in
+`light`/`medium`/`heavy`.
+
+Features komen uit polygonen (COCO) óf uit maskers (cv2-contour), zodat exact
+dezelfde feature-pijplijn geldt voor de synthetische annotaties én voor
+YOLO-voorspellingen.
+
+**Resultaat op de synthetische set** (`results/regression_report.md`):
+R² ≈ **0.92**, MAE ≈ **29 g**, klasse-accuraatheid ≈ **87 %**. Dit toont dat de
+pijplijn de (synthetische) vorm→gewicht-relatie leert; met echte gewogen data
+moeten deze cijfers opnieuw worden vastgesteld.
+
+**Gebruik:**
+```bash
+python -m src.regression.weight_model --gsd 0.25 --report results/regression_report.md
+```
+
+**Tests:** `tests/test_weight_model.py` (feature-correctheid op cirkel/vierkant,
+flat vs pairs, mask-features, fit/predict/klassen, end-to-end op synth-set).

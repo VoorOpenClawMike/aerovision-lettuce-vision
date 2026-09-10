@@ -16,3 +16,7 @@ Doorlopend logboek van de autonome build. Nieuwste onderaan.
   gebouwd; 6 unit tests groen. Converter geeft 5 train / 1 val / 150 instances.
   Echte YOLO11n-seg training gestart op CPU (yolo11n-seg.pt download via mirror;
   github.com is geblokkeerd in de container). README-sectie toegevoegd.
+- **Module 4 — regression/weight_model** ✅ Gebouwd + 6 unit tests groen.
+  Ridge-regressie op 5 vorm-features. Op synth-set: R²≈0.92, MAE≈29 g,
+  klasse-accuraatheid≈87%. Rapport naar results/regression_report.md.
+  README-sectie toegevoegd.
