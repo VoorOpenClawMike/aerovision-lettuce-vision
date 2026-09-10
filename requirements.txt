@@ -1,0 +1,23 @@
+# Core scientific stack
+numpy>=1.26
+pandas>=2.0
+scipy>=1.11
+scikit-learn>=1.3
+Pillow>=10.0
+
+# Computer vision.
+# NOTE: in a headless container use opencv-python-headless (no libGL dependency).
+# On a desktop/GPU box with a display you may swap this for opencv-python.
+opencv-python-headless>=4.9
+
+# Detection / segmentation
+ultralytics>=8.3            # YOLO11-seg
+shapely>=2.0                # polygon <-> mask geometry helpers (optional, guarded)
+
+# Dashboard
+streamlit>=1.30
+folium>=0.15
+streamlit-folium>=0.20
+
+# Testing
+pytest>=8.0

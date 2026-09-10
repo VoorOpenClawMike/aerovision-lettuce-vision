@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Generated synthetic data & model artifacts (regenerable via the pipeline)
+data/synthetic/
+runs/
+*.pt
+*.onnx
+!yolo11n-seg.pt  # allow committing a downloaded base weight if ever needed
+
+# OS / editor
+.DS_Store
+.ipynb_checkpoints/
+
+# Keep results reports but ignore large intermediate outputs
+results/*.png
+results/*.csv
