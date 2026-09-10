@@ -31,3 +31,6 @@ Doorlopend logboek van de autonome build. Nieuwste onderaan.
 - **Module 6 — dashboard** ✅ Streamlit-app + pure data-helpers gebouwd;
   6 unit tests groen. KPI's per klasse, folium-veldkaart (Bed & Bracket
   amber/groen/roestrood), gewichtshistogram per klasse. app importeert schoon.
+- **Module 7 — edge/export_tensorrt** ✅ Gebouwd + 4 unit tests groen.
+  ONNX-export werkt (best.onnx aangemaakt); TensorRT-INT8-stappen
+  gedocumenteerd (Jetson-only) en naar src/edge/TENSORRT.md geschreven.

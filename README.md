@@ -246,3 +246,24 @@ streamlit run src/dashboard/app.py           # open de demo
 
 **Tests:** `tests/test_dashboard.py` (CSV-validatie, klassetellingen,
 kleurmapping, KPI's, histogram-bins, folium-kaartopbouw).
+
+---
+
+## Module 7 — Edge-export (`src/edge/export_tensorrt.py`)
+
+Exporteert het getrainde YOLO-model naar **ONNX** (draait hier) en documenteert
+de **TensorRT-INT8**-conversie die alleen op een **Jetson met JetPack** kan
+(niet in deze container). De volledige Jetson-stappen staan in
+`TENSORRT_INSTRUCTIONS` en worden weggeschreven naar `src/edge/TENSORRT.md`.
+
+> **Belangrijk:** INT8-kalibratie vereist een *representatieve set echte*
+> orthomosaïek-crops — synthetische data geeft geen productie-representatieve
+> kwantisatie.
+
+**Gebruik:**
+```bash
+python -m src.edge.export_tensorrt --model runs/.../best.pt --imgsz 640 --write-trt-readme
+```
+
+**Tests:** `tests/test_edge.py` (ontbrekend-model-fout, instructie-inhoud,
+README-writer, echte ONNX-export indien een model beschikbaar is).
