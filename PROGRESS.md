@@ -34,3 +34,7 @@ Doorlopend logboek van de autonome build. Nieuwste onderaan.
 - **Module 7 — edge/export_tensorrt** ✅ Gebouwd + 4 unit tests groen.
   ONNX-export werkt (best.onnx aangemaakt); TensorRT-INT8-stappen
   gedocumenteerd (Jetson-only) en naar src/edge/TENSORRT.md geschreven.
+- **Afronding** — run_pipeline.sh, BLOCKERS.md, RESULTS.md geschreven.
+  Volledige testsuite: 41 passed. YOLO-detectiepad geverifieerd (175 detecties
+  op tussentijds checkpoint) én grondwaarheid-fallback (480). Demo-CSV
+  (results/field_detections.csv) via fallback = compleet, alle klassen.
