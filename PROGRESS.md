@@ -20,3 +20,11 @@ Doorlopend logboek van de autonome build. Nieuwste onderaan.
   Ridge-regressie op 5 vorm-features. Op synth-set: R²≈0.92, MAE≈29 g,
   klasse-accuraatheid≈87%. Rapport naar results/regression_report.md.
   README-sectie toegevoegd.
+- **Dataset opgeschaald** — synthetische set → 16 beelden / 480 kroppen
+  (223/116/141) voor betekenisvollere training. Regressie herdraaid:
+  R²≈0.94, MAE≈31 g, klasse-accuraatheid≈92%.
+- **Module 5 — sampling/stats** ✅ Gebouwd + 6 unit tests groen. Cochran + FPC +
+  bootstrap-BCa. Voor N=5000/95%/5%: n=357 → 10% volstaat. README + CLI.
+- **Pijplijn-orkestrator (src/pipeline.py)** ✅ Gebouwd + 3 tests groen.
+  Detectie→features→regressie→klasse→CSV met synth geo-referentie en
+  YOLO-of-grondwaarheid fallback. results/field_detections.csv (480 rijen).

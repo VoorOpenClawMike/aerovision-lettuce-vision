@@ -167,8 +167,8 @@ Features komen uit polygonen (COCO) óf uit maskers (cv2-contour), zodat exact
 dezelfde feature-pijplijn geldt voor de synthetische annotaties én voor
 YOLO-voorspellingen.
 
-**Resultaat op de synthetische set** (`results/regression_report.md`):
-R² ≈ **0.92**, MAE ≈ **29 g**, klasse-accuraatheid ≈ **87 %**. Dit toont dat de
+**Resultaat op de synthetische set** (480 kroppen, `results/regression_report.md`):
+R² ≈ **0.94**, MAE ≈ **31 g**, klasse-accuraatheid ≈ **92 %**. Dit toont dat de
 pijplijn de (synthetische) vorm→gewicht-relatie leert; met echte gewogen data
 moeten deze cijfers opnieuw worden vastgesteld.
 
@@ -179,3 +179,48 @@ python -m src.regression.weight_model --gsd 0.25 --report results/regression_rep
 
 **Tests:** `tests/test_weight_model.py` (feature-correctheid op cirkel/vierkant,
 flat vs pairs, mask-features, fit/predict/klassen, end-to-end op synth-set).
+
+---
+
+## Module 5 — Steekproef-statistiek (`src/sampling/stats.py`)
+
+Bepaalt welk steekproefpercentage (10/25/50 %) een betrouwbare schatting van de
+gewichtsklasseverdeling geeft.
+
+- **Cochran's formule** `n0 = z²·p(1-p)/e²` + **finite population correction**
+  `n = n0/(1+(n0-1)/N)`. Default `p=0.5` (meest conservatief).
+- **Bootstrap-BI (BCa)** via `scipy.stats.bootstrap` op de klasseproporties per
+  kandidaat-fractie — de empirische tegenhanger die laat zien hoe de BI-breedte
+  krimpt bij grotere steekproeven.
+
+Voorbeeld: voor `N=5000`, 95 % betrouwbaarheid, 5 % marge is de vereiste
+steekproef **n=357** (≈7 %), dus **10 %** volstaat.
+
+**Gebruik:**
+```bash
+python -m src.sampling.stats --population 5000 --confidence 0.95 --margin 0.05 \
+    --labels-csv data/synthetic/ground_truth_weights.csv
+```
+
+**Tests:** `tests/test_sampling.py` (z-waarden, worst-case n≈384, FPC, aanbeveling,
+BCa-BI-grenzen en degeneratie, fractie-evaluatie).
+
+---
+
+## Pijplijn-orkestrator (`src/pipeline.py`)
+
+Verbindt detectie → features → regressie → klasse en schrijft
+`results/field_detections.csv` (`krop_id, cx, cy, area_cm2, weight_g,
+weight_class, lat, lon`) — de invoer voor het dashboard.
+
+- Gebruikt **YOLO-detecties** als een getraind model beelden detecteert; anders
+  valt het terug op de **COCO-grondwaarheidspolygonen** (duidelijk gelogd), zodat
+  de demo altijd data heeft.
+- **Synthetische geo-referentie:** beelden hebben geen echte wereldcoördinaten;
+  ze worden op een raster nabij Midden-Limburg (≈51.25 N, 5.95 E) geplaatst.
+  Echte orthomosaïeken (GeoTIFF) dragen wél wereldcoördinaten — vervang
+  `pixel_to_latlon` dan.
+
+```bash
+python -m src.pipeline --gsd 0.25   # + optioneel --model runs/.../best.pt
+```
