@@ -87,3 +87,34 @@ hoeft te veranderen.
 
 **Tests:** `tests/test_synth_generator.py` (geometrie, gewichtsmodel,
 end-to-end generatie, determinisme).
+
+---
+
+## Module 3 — GSD-calibratie (`src/calibration/gsd.py`)
+
+Berekent de Ground Sampling Distance en zet pixel-oppervlak om naar cm².
+
+```
+GSD [cm/px] = (sensorbreedte_mm · vlieghoogte_m · 100) / (brandpuntsafstand_mm · beeldbreedte_px)
+area_cm2    = area_px · GSD²
+```
+
+> **Correctie t.o.v. opdrachtformule:** de opdracht schreef de formule zonder de
+> factor `·100`. Zonder die factor is de uitkomst *meter* per pixel i.p.v.
+> *cm* per pixel (100× te klein). Deze module gebruikt de fysisch correcte vorm:
+> een DJI Phantom 4 Pro op 30 m geeft dan ~0.82 cm/px, wat overeenkomt met de
+> fabriekstabellen. De testsuite pint deze waarde.
+
+Ingebouwde camera-presets (`dji_phantom4_pro`, `dji_mavic3`, `generic_1_2_3`).
+Meerdere vlieghoogtes geven simpelweg verschillende GSD's (hoger → grover).
+
+**Gebruik:**
+```bash
+python -m src.calibration.gsd --preset dji_phantom4_pro --altitude-m 30 --area-px 5000
+```
+
+**Echte data:** lees `sensorbreedte`, `brandpuntsafstand` en `beeldbreedte` uit
+de EXIF/specsheet van de gebruikte drone en de `vlieghoogte` uit het vluchtplan.
+
+**Tests:** `tests/test_gsd.py` (referentiewaarde, lineaire hoogte-schaling,
+oppervlak-schaling met GSD², invoervalidatie).
