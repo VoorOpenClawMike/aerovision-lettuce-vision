@@ -25,11 +25,13 @@ import streamlit as st
 from src.dashboard.data import (
     CLASS_COLORS,
     CLASS_LABELS,
+    DetectionValidationError,
     build_field_map,
     class_counts,
     histogram_bins,
     load_detections,
     summary_metrics,
+    validate_detections,
 )
 
 DEFAULT_CSV = "results/field_detections.csv"
@@ -38,13 +40,17 @@ DEFAULT_CSV = "results/field_detections.csv"
 def _read_source() -> pd.DataFrame | None:
     st.sidebar.header("Databron")
     uploaded = st.sidebar.file_uploader("Upload detectie-CSV", type=["csv"])
-    if uploaded is not None:
-        df = pd.read_csv(uploaded)
-        st.sidebar.success("CSV geladen (upload).")
-        return df
-    if os.path.exists(DEFAULT_CSV):
-        st.sidebar.info(f"Standaardbestand: `{DEFAULT_CSV}`")
-        return load_detections(DEFAULT_CSV)
+    try:
+        if uploaded is not None:
+            df = validate_detections(pd.read_csv(uploaded))
+            st.sidebar.success("CSV geladen (upload).")
+            return df
+        if os.path.exists(DEFAULT_CSV):
+            st.sidebar.info(f"Standaardbestand: `{DEFAULT_CSV}`")
+            return load_detections(DEFAULT_CSV)
+    except DetectionValidationError as exc:
+        st.error(f"❌ Detectie-CSV kon niet worden gevalideerd.\n\n{exc}")
+        st.stop()
     st.sidebar.warning(
         f"Geen CSV gevonden op `{DEFAULT_CSV}`.\n\n"
         "Genereer eerst data en draai de pijplijn:\n"

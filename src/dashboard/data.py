@@ -12,6 +12,9 @@ from __future__ import annotations
 from typing import Dict, List
 
 import pandas as pd
+import pandera.pandas as pa
+from pandera.pandas import Check, Column, DataFrameSchema
+from pandera.errors import SchemaError, SchemaErrors
 
 from src.data.synth_generator import CLASS_NAMES
 
@@ -27,16 +30,110 @@ CLASS_LABELS: Dict[str, str] = {
     "heavy": "> 500 g",
 }
 
-REQUIRED_COLUMNS = ["krop_id", "weight_class"]
+# Valid weight classes (kept in sync with the model / synth generator).
+VALID_CLASSES = list(CLASS_NAMES)
+
+
+class DetectionValidationError(ValueError):
+    """Raised when a detection CSV fails schema validation.
+
+    Subclasses ``ValueError`` so existing ``except ValueError`` handlers keep
+    working; carries a human-readable, multi-line message suitable for showing
+    directly to a user (e.g. via ``st.error``).
+    """
+
+
+# pandera schema for a detection CSV. ``strict=False`` so bookkeeping columns
+# the dashboard ignores (e.g. ``image``, ``area_px``) pass through untouched.
+# Required columns must be present; optional columns are only validated when the
+# CSV actually contains them.
+DETECTION_SCHEMA = DataFrameSchema(
+    {
+        # Unique identifier per lettuce head. Coerced to string so a CSV with
+        # integer ids still validates; duplicates are rejected.
+        "krop_id": Column(str, unique=True, coerce=True, nullable=False),
+        "weight_class": Column(
+            str,
+            Check.isin(VALID_CLASSES),
+            coerce=True,
+            nullable=False,
+        ),
+        # Optional numeric columns with sane physical ranges.
+        "cx": Column(float, Check.ge(0), required=False, coerce=True, nullable=False),
+        "cy": Column(float, Check.ge(0), required=False, coerce=True, nullable=False),
+        "area_cm2": Column(
+            float, Check.gt(0), required=False, coerce=True, nullable=False
+        ),
+        "weight_g": Column(
+            float,
+            Check.in_range(0, 2000),
+            required=False,
+            coerce=True,
+            nullable=False,
+        ),
+        # When lat/lon are present they must be real, non-NaN coordinates.
+        "lat": Column(
+            float,
+            Check.in_range(-90, 90),
+            required=False,
+            coerce=True,
+            nullable=False,
+        ),
+        "lon": Column(
+            float,
+            Check.in_range(-180, 180),
+            required=False,
+            coerce=True,
+            nullable=False,
+        ),
+    },
+    strict=False,
+    coerce=True,
+)
+
+
+def _format_schema_errors(exc: SchemaError | SchemaErrors) -> str:
+    """Turn a pandera error into a short, readable, user-facing message."""
+    cases = getattr(exc, "failure_cases", None)
+    if cases is None or getattr(cases, "empty", True):
+        return f"Ongeldige detectie-CSV: {exc}"
+
+    lines: List[str] = []
+    for _, row in cases.head(10).iterrows():
+        column = row.get("column")
+        check = row.get("check")
+        value = row.get("failure_case")
+        index = row.get("index")
+        where = f" (rij {index})" if index is not None and pd.notna(index) else ""
+        col = f"kolom '{column}'" if column is not None and pd.notna(column) else "schema"
+        lines.append(f"  • {col}: {check} — waarde: {value!r}{where}")
+
+    n = len(cases)
+    more = f"\n  … en nog {n - 10} probleem(en)" if n > 10 else ""
+    return (
+        f"Ongeldige detectie-CSV — {n} probleem(en) gevonden:\n"
+        + "\n".join(lines)
+        + more
+    )
+
+
+def validate_detections(df: pd.DataFrame) -> pd.DataFrame:
+    """Validate a detection DataFrame against ``DETECTION_SCHEMA``.
+
+    Returns the validated (coerced) frame on success. On any schema violation
+    raises :class:`DetectionValidationError` with a clear, multi-line message
+    instead of letting data be silently dropped or the app crash.
+    """
+    try:
+        return DETECTION_SCHEMA.validate(df, lazy=True)
+    except (SchemaError, SchemaErrors) as exc:
+        raise DetectionValidationError(_format_schema_errors(exc)) from exc
 
 
 def load_detections(csv_path: str) -> pd.DataFrame:
-    """Load a detection CSV and validate the required columns are present."""
+    """Load a detection CSV and validate it against the pandera schema."""
     df = pd.read_csv(csv_path)
-    missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
-    if missing:
-        raise ValueError(f"detection CSV missing columns: {missing}")
-    return df
+    return validate_detections(df)
 
 
 def class_counts(df: pd.DataFrame) -> Dict[str, int]:
